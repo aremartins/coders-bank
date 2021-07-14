@@ -27,10 +27,12 @@ public class Banco {
 	public void deleteAccount(String name) {
 		if (getAccount(name).getSaldo() > 0) {
 			System.out.println("Você deve sacar todo dinheiro antes de encerrar a conta");
-			return;
-		}else {
-		Conta account = getAccount(name);
-		accounts.remove(account);
+		} else if (getAccount(name).getSaldo() < 0) {
+			System.out.println("Verifique débitos pendentes com a instituição.");
+		}else if(getAccount(name).getSaldo() == 0) {
+			Conta account = getAccount(name);
+			accounts.remove(account);
+			System.out.println("Conta encerrada com sucesso.");
 		}
 	}
 }
