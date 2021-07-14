@@ -1,89 +1,56 @@
 package contas_bancarias;
 
+import java.util.Random;
+
 public abstract class Conta {
+	Random random = new Random();
+	private int numero = random.nextInt(9999);
 	private double saldo;
-	private int agencia;
-	private double numero;
-	private String tipoConta;
-	private Cliente titular;
-	private boolean status = false;
+	private Cliente cliente;
+	private double somaDeposito = 0;
+	private double somaTransferencias;
 
-	public Conta(int agencia, Cliente titular, String tipoConta, double saldo) {
-		this.status = true;
-		this.titular = titular;
-		if (agencia <= 0) {
-			System.out.println("Número deve ser maior que 0");
-		}
-		this.agencia = agencia;
+	public Conta(Cliente titular, double saldo) {
+		this.cliente = titular;
+		deposita(saldo);
 
-		this.numero = Math.random();
-		this.numero = Math.round(this.numero);
-
-		this.tipoConta = tipoConta;
-
-		this.saldo = saldo;
-
-		System.out.println("Estou criando uma conta do tipo: " + tipoConta + " /Agência:" + ' ' + agencia + " /Número: "
-				+ numero + " /com saldo inicial de R$" + saldo + " /Status:" + status);
-
+		System.out.println("Estou criando uma conta /Número: " + numero + " /com saldo inicial de R$" + saldo);
 	}
 
-	public void abrirConta() {
-		this.setStatus(true);
+	public Cliente getCliente() {
+		return cliente;
 	}
 
-	public boolean getStatus() {
-		return this.status;
+	public void setCliente(Cliente cliente) {
+
+		this.cliente = cliente;
 	}
 
-	public void setStatus(boolean status) {
-		this.status = status;
+	@Override
+	public String toString() {
+		return "Conta [random=" + random + ", numero=" + numero + ", saldo=" + saldo + ", titular=" + cliente + "]";
 	}
 
-	public String getTipoConta() {
-		return tipoConta;
-	}
-
-	public void setTipoConta(String tipoConta) {
-		this.tipoConta = tipoConta;
-	}
-
-	public double getNumero() {
-		return this.numero;
-	}
-
-	public void setAgencia(int agencia) {
-		if (agencia <= 0) {
-			System.out.println("O número deve ser maior que 0");
-		}
-		this.agencia = agencia;
-	}
-
-	public int getAgencia() {
-		return this.agencia;
-	}
-
-	void deposita(double valor) {
+	public void deposita(double valor) {
 		this.saldo += valor;
+		this.somaDeposito += valor;
 	}
 
-	public boolean saca(double valor) {
-		if (this.saldo >= valor) {
-			this.saldo -= valor;
-			return true;
+	public void saca(double valor) throws Exception {
+		if (this.getSaldo() < valor) {
+			throw new Exception("Seu saldo não é suficiente!");
 		} else {
-			return false;
+			this.saldo -= valor;
 		}
 	}
 
-	public boolean transfere(double valor, Conta destino) {
-		if (this.saldo >= valor) {
-			this.saldo -= valor;
-			destino.deposita(valor);
-			return true;
-		} else {
-			return false;
+	public void transfere(double valor, Conta destino) throws Exception {
+		if (this.getSaldo() < valor) {
+			throw new Exception("Saldo insuficiente");
 		}
+		this.saldo -= valor;
+		destino.deposita(valor);
+		this.somaTransferencias += valor;
 	}
 
 	public double getSaldo() {
@@ -91,38 +58,22 @@ public abstract class Conta {
 	}
 
 	public void setTitular(Cliente titular) {
-		this.titular = titular;
+		this.cliente = titular;
 	}
 
 	public Cliente getTitular() {
-		return titular;
+		return cliente;
 	}
-
-	public void listaExtrato() {
-
-	}
-
-	public void sacar() {
-
-	}
-
-	public void depositar() {
-
+	
+	public void listarExtrato() {
+		System.out.println("**********Extrato de movimentações***********");
+		System.out.println("Valor total em depósitos: " + this.somaDeposito);
+		System.out.println("Valor total transferido: " + this.somaTransferencias);
+		System.out.println("Saldo atual :" + this.getSaldo());
+		System.out.println("*********************************************");		
 	}
 
 	public void adicionarLimite() {
-
-	}
-
-	public void encerrarConta() {
-		if (this.getSaldo() > 0) {
-			System.out.println("Conta não pode ser fechada pois ainda tem saldo");
-		} else if (this.getSaldo() < 0) {
-			System.out.println("Conta não pode ser fechada pois está em débito");
-		} else {
-			this.setStatus(false);
-			System.out.println("Conta fechada com sucesso!");
-		}
 
 	}
 
