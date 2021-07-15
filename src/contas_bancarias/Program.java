@@ -6,7 +6,7 @@ import java.util.Locale;
 import java.util.Scanner;
 
 public class Program {
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
 		// Criar conta - perguntar nome cliente, saldo inicial, tipo de conta e id
 		// aleatório de 4 digitos
 		Locale.setDefault(new Locale("pt", "BR"));
@@ -26,7 +26,7 @@ public class Program {
 		// especial).
 	}
 
-	public static void mainMenu(Banco bank) {
+	public static void mainMenu(Banco bank) throws Exception {
 		Scanner sc = new Scanner(System.in);
 		boolean isRunning = true;
 		do {
@@ -62,8 +62,10 @@ public class Program {
 				}
 				System.out.print("Digite o depósito inicial: ");
 				double initialDeposit = sc.nextDouble();
+                Cliente client = new Cliente(clientName, cpf, occupation);
+
 				if (accountType.equals("CC")) {
-					bank.addAccount(new ContaCorrente(new Cliente(clientName, cpf, occupation), initialDeposit));
+                    bank.addAccount(new ContaCorrente(client, initialDeposit, 300.0));					
 				} else {
 					bank.addAccount(new ContaPoupanca(new Cliente(clientName, cpf, occupation), initialDeposit));
 				}
@@ -82,7 +84,7 @@ public class Program {
 		sc.close();
 	}
 
-	public static void clientMenu(Banco bank) {
+	public static void clientMenu(Banco bank) throws Exception {
 		Scanner sc = new Scanner(System.in);
 		System.out.print("Digite seu nome completo: ");
 		String clientName = sc.nextLine().trim();
@@ -91,7 +93,7 @@ public class Program {
 			return;
 		}
 		Conta account = bank.getAccount(clientName);
-		System.out.printf("Bem vindo(a) %s", account.getCliente().getNome());
+		System.out.printf("============== Bem vindo(a) %s", account.getCliente().getNome() + " ================");
 		System.out.println();
 		int resp;
 		do {
@@ -112,6 +114,7 @@ public class Program {
 				break;
 			case 2:
 				account.listarExtrato();
+				account.showStatement();
 				break;
 			case 3:
 				// realizar saque
@@ -140,9 +143,6 @@ public class Program {
 				String name = sc.next();
 				Conta destination = bank.getAccount(name);
 				System.out.println("Digite o valor para transferir:");
-
-				// checar se existe destinatário
-				// se existir faz a transferencia senão informa que não existe pessoa
 				try {
 					account.transfere(sc.nextDouble(), destination);
 
@@ -150,9 +150,25 @@ public class Program {
 
 				}
 				break;
-			case 6:
-				// adicionar limite cheque especial
-				break;
+			case 6:				
+				 if (account instanceof ContaCorrente) {
+                     System.out.println("Solicite um valor maior de cheque especial");
+                     System.out.printf("Seu valor atual é %.2f%n",
+                             ((ContaCorrente) account).getOverdraft());
+                     System.out.print("Novo valor: ");
+                     double newOverdraft = sc.nextDouble();
+                     System.out.println("Simulação gerente aprovando e digitando a senha ...");
+                     System.out.print("Digite a senha gerente: ");
+                     String password = sc.next();
+                     try {
+                         ((ContaCorrente) account).setOverdraft(newOverdraft, password);
+                     } catch (Exception e) {
+                         System.out.println(e.getMessage());
+                     }
+                 } else {
+                     System.out.println("Função indisponível para conta poupança");
+                 }
+                 break;
 			case 7:
 				System.out.println("Tem certeza que deseja encerrar a conta [s/N]?");
 				if (sc.next().charAt(0) == 's') {
